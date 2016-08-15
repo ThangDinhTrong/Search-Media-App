@@ -19,6 +19,7 @@ class ViewController: UIViewController {
     var movies = [Movie]()
     var ebooks = [Ebook]()
     var indexPaths = [NSIndexPath]()
+    var pageViewController: UIPageViewController!
     var delegate:ViewControllerAssignDataDelegate!
     static var sharedViewController=ViewController()
 
@@ -28,17 +29,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(2)
         self.searchBar.delegate=self
-        // Do any additional setup after loading the view, typically from a nib.
-        
-        
-        let leftGesture = UISwipeGestureRecognizer(target: self, action: #selector(swipeAction(_:)))
-        leftGesture.direction = UISwipeGestureRecognizerDirection.Left
-        self.view.addGestureRecognizer(leftGesture)
-        let rightGesture = UISwipeGestureRecognizer(target: self, action: #selector(swipeAction(_:)))
-        rightGesture.direction = UISwipeGestureRecognizerDirection.Right
-        self.view.addGestureRecognizer(rightGesture)
         
         for i in 0...4 {
             let index = NSIndexPath(forItem: i, inSection: 0)
@@ -53,6 +44,7 @@ class ViewController: UIViewController {
                 self.revealViewController().panGestureRecognizer().enabled = false
             }
         }
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -74,57 +66,18 @@ class ViewController: UIViewController {
         
         task.resume()
     }
-
-
-}
-//xu li gesture
-extension ViewController {
-    func swipeAction(swipe:UISwipeGestureRecognizer) {
-        var searchTerm = mediaArray[currentCellIndexRow]
-        switch swipe.direction {
-        case UISwipeGestureRecognizerDirection.Right:
-            if currentCellIndexRow == 0 {
-                return
-            }
-            
-            lastCellIndexRow=currentCellIndexRow
-            currentCellIndexRow = currentCellIndexRow - 1
-            searchTerm = mediaArray[currentCellIndexRow]
-            print(searchTerm)
-
-        case UISwipeGestureRecognizerDirection.Left:
-            if currentCellIndexRow == 4 {
-                return
-            }
-            
-            lastCellIndexRow=currentCellIndexRow
-            currentCellIndexRow = currentCellIndexRow + 1
-            searchTerm = mediaArray[currentCellIndexRow]
-            print(searchTerm)
-
-        default:
-            print("unknown")
-        }
-        if currentCellIndexRow != 0 && self.revealViewController() != nil{
-            self.revealViewController().panGestureRecognizer().enabled = false
-        }
-        else if currentCellIndexRow==0 && self.revealViewController() != nil{
-            self.revealViewController().panGestureRecognizer().enabled = true
-        }
-        let index = NSIndexPath(forItem: currentCellIndexRow, inSection: 0)
-        self.collectionView.scrollToItemAtIndexPath(index, atScrollPosition: UICollectionViewScrollPosition.CenteredHorizontally, animated: true)
-
-        for index in self.indexPaths {
-            self.collectionView.cellForItemAtIndexPath(index)?.backgroundColor = UIColor(red: 255, green: 175, blue: 50, alpha: 0)
-        }
-        self.collectionView.cellForItemAtIndexPath(self.indexPaths[currentCellIndexRow])?.backgroundColor=UIColor(red: 255, green: 90, blue: 50, alpha: 0.25)
-        if !((searchBar.text?.isEmpty)!) {
-            self.searchBarSearchButtonClicked(self.searchBar)
-        }
-        
-    }
     
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "pageView" {
+            let destination = segue.destinationViewController as! PageViewController
+            pageViewController = destination
+            pageViewController.dataSource = self
+        }
+    }
+
+
 }
+
 extension ViewController:UICollectionViewDataSource {
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 5
@@ -149,7 +102,6 @@ extension ViewController:UICollectionViewDataSource {
         if indexPath.row==currentCellIndexRow {
             cell.backgroundColor = UIColor(red: 255, green: 90, blue: 50, alpha: 0.25)
         }
-//        self.indexPaths.append(indexPath)
         return cell
     }
 }
@@ -162,6 +114,7 @@ extension ViewController: UICollectionViewDelegate {
         }
         self.collectionView.cellForItemAtIndexPath(indexPath)?.backgroundColor=UIColor(red: 255, green: 90, blue: 50, alpha: 0.25)
         self.searchBarSearchButtonClicked(self.searchBar)
+        self.pageViewController.reloadInputViews()
     }
 }
 
@@ -174,7 +127,6 @@ extension ViewController:SearchManagerDelegate {
     func assignData(movies: [Movie]) {
         self.movies=movies
         ViewController.sharedViewController.delegate.assignData(currentCellIndexRow, musicvideos: musicvideos, movies: movies, ebooks: ebooks, audiobooks: audiobooks, podcasts: podcasts)
-
     }
     func assignData(podcasts: [Podcast]) {
         self.podcasts=podcasts
@@ -200,6 +152,48 @@ extension ViewController:UISearchBarDelegate {
         SearchManager.shareSearchManager.delegate=self
         print("search \(mediaArray[currentCellIndexRow])")
         SearchManager.shareSearchManager.getDatafromSearchText(self.searchBar, media: mediaArray[currentCellIndexRow])
+        self.pageViewController.reloadInputViews()
+    }
+}
+extension ViewController:UIPageViewControllerDataSource {
+    func pageViewController(pageViewController: UIPageViewController, viewControllerAfterViewController viewController: UIViewController) -> UIViewController? {
+        print("swipe")
+        self.revealViewController().panGestureRecognizer().enabled = false
+        if currentCellIndexRow<4{
+        self.currentCellIndexRow+=1
+        }
+        let index = NSIndexPath(forItem: currentCellIndexRow, inSection: 0)
+        self.collectionView.scrollToItemAtIndexPath(index, atScrollPosition: UICollectionViewScrollPosition.CenteredHorizontally, animated: true)
+        for index in self.indexPaths {
+            self.collectionView.cellForItemAtIndexPath(index)?.backgroundColor = UIColor(red: 255, green: 175, blue: 50, alpha: 0)
+        }
+        self.collectionView.cellForItemAtIndexPath(self.indexPaths[currentCellIndexRow])?.backgroundColor=UIColor(red: 255, green: 90, blue: 50, alpha: 0.25)
+        SearchManager.shareSearchManager.delegate=self
+        print("search \(mediaArray[currentCellIndexRow])")
+        SearchManager.shareSearchManager.getDatafromSearchText(self.searchBar, media: mediaArray[currentCellIndexRow])
+        return storyboard?.instantiateViewControllerWithIdentifier("PageContent")
+    }
+    
+    func pageViewController(pageViewController: UIPageViewController, viewControllerBeforeViewController viewController: UIViewController) -> UIViewController? {
+        print("swipe")
+        print(currentCellIndexRow)
+        if currentCellIndexRow>0 {
+        self.currentCellIndexRow-=1
+            if currentCellIndexRow==0 && self.revealViewController() != nil{
+                self.revealViewController().panGestureRecognizer().enabled = true
+                print(self.revealViewController().panGestureRecognizer().enabled)
+            }
+        }
+        let index = NSIndexPath(forItem: currentCellIndexRow, inSection: 0)
+        self.collectionView.scrollToItemAtIndexPath(index, atScrollPosition: UICollectionViewScrollPosition.CenteredHorizontally, animated: true)
+        for index in self.indexPaths {
+            self.collectionView.cellForItemAtIndexPath(index)?.backgroundColor = UIColor(red: 255, green: 175, blue: 50, alpha: 0)
+        }
+        self.collectionView.cellForItemAtIndexPath(self.indexPaths[currentCellIndexRow])?.backgroundColor=UIColor(red: 255, green: 90, blue: 50, alpha: 0.25)
+        SearchManager.shareSearchManager.delegate=self
+        print("search \(mediaArray[currentCellIndexRow])")
+        SearchManager.shareSearchManager.getDatafromSearchText(self.searchBar, media: mediaArray[currentCellIndexRow])
+        return storyboard?.instantiateViewControllerWithIdentifier("PageContent")
     }
 }
 protocol ViewControllerAssignDataDelegate {

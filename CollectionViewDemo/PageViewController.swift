@@ -30,10 +30,12 @@ class PageViewController: UIPageViewController,UIPageViewControllerDataSource {
     }
     
     func pageViewController(pageViewController: UIPageViewController, viewControllerAfterViewController viewController: UIViewController) -> UIViewController? {
+        print("swipe")
         return storyboard?.instantiateViewControllerWithIdentifier("PageContent")
     }
     
     func pageViewController(pageViewController: UIPageViewController, viewControllerBeforeViewController viewController: UIViewController) -> UIViewController? {
+        print("swipe")
         return storyboard?.instantiateViewControllerWithIdentifier("PageContent")
     }
 

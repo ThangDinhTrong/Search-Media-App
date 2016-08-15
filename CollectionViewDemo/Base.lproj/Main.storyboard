@@ -75,7 +75,7 @@
                             <containerView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mhs-b2-acS">
                                 <rect key="frame" x="0.0" y="94" width="600" height="442"/>
                                 <connections>
-                                    <segue destination="RNp-WX-PIS" kind="embed" id="Zi4-KZ-7N2"/>
+                                    <segue destination="RNp-WX-PIS" kind="embed" identifier="pageView" id="Zi4-KZ-7N2"/>
                                 </connections>
                             </containerView>
                         </subviews>
@@ -398,6 +398,10 @@
         <scene sceneID="RO6-k0-zbE">
             <objects>
                 <viewController storyboardIdentifier="PageViewController" id="RNp-WX-PIS" customClass="PageViewController" customModule="CollectionViewDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="eBE-fB-uGv"/>
+                        <viewControllerLayoutGuide type="bottom" id="zIV-bT-xKc"/>
+                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="tVq-eE-4Rt">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="442"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

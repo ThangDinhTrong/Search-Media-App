@@ -32,6 +32,8 @@ class MenuTableViewController: UITableViewController {
 
 
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        print("Menu active")
+        PageViewController.isLoadedFirstTime = false
         switch segue.identifier! {
             case "musicVideo":
                 let viewController = segue.destinationViewController.childViewControllers[0] as! ViewController

@@ -18,6 +18,7 @@ class MainTableViewController: UITableViewController,ViewControllerAssignDataDel
     var ebooks = [Ebook]()
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("load table")
         ViewController.sharedViewController.delegate=self
         self.tableView.estimatedRowHeight = 100
         self.tableView.rowHeight = UITableViewAutomaticDimension
